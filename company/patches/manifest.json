@@ -1,0 +1,17 @@
+{
+  "description": "官方代码升级时需要重放的公司改动。company/scripts/upgrade-official.ps1 读取本文件。",
+  "ownedFilesNote": "ownedFiles 是相对仓库根的路径，属于公司自己的文件；升级时既不删除也不覆盖。",
+  "ownedFiles": [
+    "company/Dockerfile",
+    "company/docker-compose.company.yml",
+    "company/patches/PATCHES.md",
+    "company/UPSTREAM.md"
+  ],
+  "patches": [
+    {
+      "id": "P-001",
+      "file": "branding/0001-admin-primary-color.patch",
+      "desc": "管理后台主色改为品牌靛蓝 #4F46E5"
+    }
+  ]
+}

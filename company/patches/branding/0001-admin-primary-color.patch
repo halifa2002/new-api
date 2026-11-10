@@ -1,0 +1,48 @@
+diff --git a/web/src/styles/theme.css b/web/src/styles/theme.css
+index 8966c4fc..0fdc6cce 100644
+--- a/web/src/styles/theme.css
++++ b/web/src/styles/theme.css
+@@ -109,10 +109,10 @@ For commercial licensing, please contact support@quantumnous.com
+   --card-foreground: oklch(0.145 0 0);
+   --popover: oklch(1 0 0);
+   --popover-foreground: oklch(0.145 0 0);
+-  --primary: oklch(0.692 0.141 243.716);
++  --primary: #4F46E5;
+   --primary-foreground: oklch(1 0 0);
+   --secondary: oklch(0.95 0 0);
+-  --secondary-foreground: oklch(0.42 0.16 250);
++  --secondary-foreground: #4338CA;
+   --muted: oklch(0.97 0 0);
+   --muted-foreground: oklch(0.49 0 0);
+   --accent: color-mix(in oklch, var(--primary) 12%, var(--background));
+@@ -129,8 +129,8 @@ For commercial licensing, please contact support@quantumnous.com
+   --neutral-foreground: oklch(0.145 0 0);
+   --border: oklch(0.93 0 0);
+   --input: oklch(0.93 0 0);
+-  --ring: oklch(0.708 0.16 249.003);
+-  --chart-1: oklch(0.72 0.18 250);
++  --ring: #6366F1;
++  --chart-1: #6366F1;
+   --chart-2: oklch(0.65 0.15 200);
+   --chart-3: oklch(0.7 0.12 280);
+   --chart-4: oklch(0.68 0.19 325);
+@@ -189,7 +189,7 @@ For commercial licensing, please contact support@quantumnous.com
+   --card-foreground: oklch(0.965 0 0);
+   --popover: oklch(0.305 0 0);
+   --popover-foreground: oklch(0.965 0 0);
+-  --primary: oklch(0.54 0.142 248.516);
++  --primary: #6366F1;
+   --primary-foreground: oklch(1 0 0);
+   --secondary: oklch(0.335 0 0);
+   --secondary-foreground: oklch(0.9 0.05 250);
+@@ -209,8 +209,8 @@ For commercial licensing, please contact support@quantumnous.com
+   --neutral-foreground: oklch(0.155 0 0);
+   --border: oklch(1 0 0 / 10%);
+   --input: oklch(1 0 0 / 17%);
+-  --ring: oklch(0.554 0.148 250.726);
+-  --chart-1: oklch(0.76 0.14 250);
++  --ring: #818CF8;
++  --chart-1: #818CF8;
+   --chart-2: oklch(0.76 0.13 200);
+   --chart-3: oklch(0.76 0.13 285);
+   --chart-4: oklch(0.75 0.16 325);

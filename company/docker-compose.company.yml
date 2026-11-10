@@ -1,0 +1,80 @@
+# 公司版部署配置
+#
+# 与官方 docker-compose.yml 的区别：只用一处——镜像换成我们自己构建的 company-newapi。
+# 其余（数据库、Redis、端口、数据目录）全部沿用官方配置，保证数据不用迁移。
+#
+# 用法：
+#   docker compose -f docker-compose.company.yml up -d
+#
+# 构建镜像（改了前端配色或代码后需重新执行）：
+#   docker build -t company-newapi:0.3.0 -t company-newapi:latest .
+#
+# ⚠️ 上线前必须改：SQL_DSN 与 REDIS_CONN_STRING 里的密码
+
+services:
+  new-api:
+    # ↓ 唯一与官方不同的一行：用公司自有镜像
+    image: company-newapi:0.3.0
+    container_name: new-api
+    restart: always
+    command: --log-dir /app/logs
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/data
+      - ./logs:/app/logs
+    environment:
+      - SQL_DSN=postgresql://root:123456@postgres:5432/new-api
+      - REDIS_CONN_STRING=redis://:123456@redis:6379
+      - TZ=Asia/Shanghai
+      - ERROR_LOG_ENABLED=true
+      - BATCH_UPDATE_ENABLED=true
+      - NODE_NAME=new-api-node-1
+    depends_on:
+      - redis
+      - postgres
+    networks:
+      - new-api-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:3000/api/status | grep -o '\"success\":\\s*true' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    command: ["redis-server", "--requirepass", "123456"]
+    networks:
+      - new-api-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "123456", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: "123456"
+      POSTGRES_DB: new-api
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - new-api-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d new-api"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pg_data:
+
+networks:
+  new-api-network:
+    driver: bridge
