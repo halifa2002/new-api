@@ -1,9 +1,9 @@
 // 从官方 router/*.go 静态导出接口清单。
-// 用法：node scripts/export-api-inventory.mjs
-// 输出：docs/API-INVENTORY.md
+// 用法（在仓库根执行）：node company/scripts/export-api-inventory.mjs
+// 输出：company/docs/API-INVENTORY.md
 //
 // 统计口径（与 AUDIT.md 保持一致）：
-//   1. 只统计 backend/router/ 下非 _test.go 文件里的注册语句；
+//   1. 只统计 router/ 下非 _test.go 文件里的注册语句；
 //   2. 一条注册算一条，gin 的 Any 按 1 条计（运行时展开为多个方法）；
 //   3. 循环注册的路由表（channelPermissionRoutes）与内联 handlePermissionRoute 一并计入；
 //   4. 注释掉的注册语句不计；
@@ -14,8 +14,8 @@ import path from "node:path";
 import { posix } from "node:path";
 
 const ROOT = path.resolve(process.cwd());
-const ROUTER_DIR = path.join(ROOT, "backend", "router");
-const OUT_FILE = path.join(ROOT, "docs", "API-INVENTORY.md");
+const ROUTER_DIR = path.join(ROOT, "router");
+const OUT_FILE = path.join(ROOT, "company", "docs", "API-INVENTORY.md");
 
 const METHODS = "GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|Any|Handle";
 const groupRe = /^\s*(\w+)\s*:?=\s*(\w+)\.Group\(\s*"([^"]*)"/;

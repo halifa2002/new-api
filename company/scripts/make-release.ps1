@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
   发一个公司版本：从 develop 切出 release 分支 → 跑检查 → 合进 main → 打版本标签。
 
@@ -122,10 +122,10 @@ try {
     }
 
     Write-Step '接下来还要做四件事'
-    Write-Host '    1) 更新 VERSION.md 的 7 项（公司版本 / 官方版本 / 官方 SHA / 补丁号 / Portal 版本 / 数据库 / 镜像标签）'
-    Write-Host "    2) 构建镜像：docker build -f backend/Dockerfile.company -t company-newapi:$Version backend"
-    Write-Host '    3) 按 DEPLOY.md 部署，然后跑 scripts\smoke-test.ps1'
-    Write-Host '    4) 出问题按 ROLLBACK.md 退回上一版'
+    Write-Host '    1) 更新 company/VERSION.md 的 7 项（公司版本 / 官方版本 / 官方 SHA / 补丁号 / Portal 版本 / 数据库 / 镜像标签）'
+    Write-Host "    2) 构建镜像（在仓库根）：cd web && bun run build；回根后 go build -o company/new-api-linux .；docker build -f company/Dockerfile -t company-newapi:$Version ."
+    Write-Host '    3) 按 company/DEPLOY.md 部署，然后跑 company\scripts\smoke-test.ps1'
+    Write-Host '    4) 出问题按 company/ROLLBACK.md 退回上一版'
     Write-Host ''
     Write-Host "    现在停在 main 分支，版本 v$Version 已打过标签。" -ForegroundColor Green
 }

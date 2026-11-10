@@ -2,7 +2,7 @@
 
 > 对应领导文档第十章 Phase 0 交付物「官方 API 接口清单」。
 > 由 `scripts/export-api-inventory.mjs` 从 `backend/router/*.go` 静态导出，不是手抄。
-> 生成时间：2026-11-10 15:25　｜　基线：官方 v1.0.0-rc.49（commit 48a6c87）
+> 生成时间：2026-11-10 16:43　｜　基线：官方 v1.0.0-rc.49（commit 48a6c87）
 
 ## 统计口径
 

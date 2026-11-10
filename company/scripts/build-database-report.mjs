@@ -1,11 +1,11 @@
-// 把从 PostgreSQL 导出的结构数据整理成 docs/DATABASE.md。
-// 用法：先按 AUDIT 流程导出 _tmp_columns/indexes/rows，再 node scripts/build-database-report.mjs
+// 把从 PostgreSQL 导出的结构数据整理成 company/docs/DATABASE.md。
+// 用法（在仓库根执行）：先按 AUDIT 流程导出 _tmp_columns/indexes/rows 到 company/docs，再 node company/scripts/build-database-report.mjs
 
 import fs from "node:fs";
 import path from "node:path";
 
 const ROOT = path.resolve(process.cwd());
-const DOCS = path.join(ROOT, "docs");
+const DOCS = path.join(ROOT, "company", "docs");
 // PowerShell 的重定向在部分环境下写 UTF-16LE，这里按 BOM 自动识别
 const read = (f) => {
   const buf = fs.readFileSync(path.join(DOCS, f));
