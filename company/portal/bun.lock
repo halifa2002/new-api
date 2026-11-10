@@ -63,6 +63,13 @@
       "name": "@portal/types",
       "version": "0.1.0",
     },
+    "packages/ui": {
+      "name": "@portal/ui",
+      "version": "0.1.0",
+      "peerDependencies": {
+        "react": ">=18",
+      },
+    },
   },
   "packages": {
     "@alloc/quick-lru": ["@alloc/quick-lru@5.3.0", "", {}, "sha512-U4+70Pc5ZS9osnCBCE5Jha/ciHM+Yp+CNMNC/7HvYbNRk1Ldd+f7qO65W5qfhu/TCv+/ozljlXXe9Nj8419DMA=="],
@@ -158,6 +165,8 @@
     "@portal/design-tokens": ["@portal/design-tokens@workspace:packages/design-tokens"],
 
     "@portal/types": ["@portal/types@workspace:packages/types"],
+
+    "@portal/ui": ["@portal/ui@workspace:packages/ui"],
 
     "@portal/website": ["@portal/website@workspace:apps/website"],
 

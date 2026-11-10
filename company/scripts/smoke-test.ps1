@@ -316,8 +316,8 @@ else {
 
 # ── 11~13. 无法脚本化的三项 ────────────────────────────────────────────
 Write-Result '官方后端编译' 'MANUAL' '在升级流程里执行 go build ./...'
-Write-Result '公司前端构建' 'MANUAL' '执行 npm run build（frontend/apps/website 与 console）'
-Write-Result 'Docker 镜像构建' 'MANUAL' '执行 docker build -t company-newapi:<tag> .'
+Write-Result '公司前端构建' 'MANUAL' '执行 npm run build（company/portal/apps/website 与 console）'
+Write-Result 'Docker 镜像构建' 'MANUAL' '执行 cd web && bun run build；回根后 docker build -f company/Dockerfile -t company-newapi:<tag> .'
 
 # ── 汇总 ──────────────────────────────────────────────────────────────
 Write-Host ('-' * 60)

@@ -60,7 +60,7 @@ docker push registry.example.com/company-newapi:<版本号>
 官网是 Next.js 静态导出，构建产物直接交给 nginx。
 
 ```bash
-cd frontend/apps/website
+cd company/portal/apps/website
 # 关键：这两个环境变量决定页面上显示的 API 地址和控制台地址
 NEXT_PUBLIC_API_BASE_URL=https://api.example.com \
 NEXT_PUBLIC_CONSOLE_URL=https://console.example.com \

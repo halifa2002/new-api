@@ -35,11 +35,11 @@
 
 | 事项 | 状态 |
 | --- | --- |
-| 3.1 核心仓库（官方代码 + 补丁 + 部署 + 脚本） | ✅ `deploy/`、`scripts/`、`company-patches/` 已建；升级一条命令自动重放补丁，rc.49 演练零差异 |
+| 3.1 核心仓库（官方代码 + 补丁 + 部署 + 脚本） | ✅ `deploy/`、`scripts/`、`company/patches/` 已建；升级一条命令自动重放补丁，rc.49 演练零差异 |
 | 3.2 品牌前端仓库（monorepo） | 🟡 实际三个包：`api-client`、`design-tokens`、`types`；领导列的 `ui` 公共组件包未拆出去，组件在各 app 内 |
 | 两个仓库 vs 一个仓库 | 🟡 合并成一个，需向领导报备 |
 | 3.1 分支策略（main/develop/release） | ✅ `develop` 已对齐 main，发版走 `scripts/make-release.ps1` 一条命令，规则见 `UPGRADE.md` 第八节 |
-| 3.3 官方代码修改原则 | ✅ 一处配色补丁，补丁文件在 `company-patches/`，由 `scripts/upgrade-official.ps1` 自动重放 |
+| 3.3 官方代码修改原则 | ✅ 一处配色补丁，补丁文件在 `company/patches/`，由 `scripts/upgrade-official.ps1` 自动重放 |
 
 # 四、UI 产品设计方案
 
@@ -171,9 +171,9 @@
 ## 命令备忘（本机跑起来）
 
 - 官方后台：`localhost:3000`
-- 品牌官网：`localhost:3001`（`cd frontend/apps/website && npm run dev`）
-- 用户控制台：`localhost:3002`（`cd frontend/apps/console && npm run dev`）
-- 单元测试：`cd frontend/apps/website && npm run test:unit`
+- 品牌官网：`localhost:3001`（`cd company/portal/apps/website && npm run dev`）
+- 用户控制台：`localhost:3002`（`cd company/portal/apps/console && npm run dev`）
+- 单元测试：`cd company/portal/apps/website && npm run test:unit`
 - 冒烟测试：`.\scripts\smoke-test.ps1 -ApiKey sk-xxx`
 - 管理员账号：`cdadmin`
 

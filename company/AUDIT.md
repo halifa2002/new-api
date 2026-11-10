@@ -1,6 +1,8 @@
 # 官方代码审计报告
 
 > 对应领导文档第十章 Phase 0 交付物「官方架构审计报告」。
+> **2026-11-10 晚更新**：审计完成后，仓库已按领导要求重排为真正的 Fork（官方代码在根目录，公司内容在 `company/`，分支 main / develop）。本文第二、四节与第十一节描述的「代码在 `backend/` 子目录」「不是 Fork」已过时，最新结构见 `company/README.md` 与 `company/UPGRADE.md`。审计结论（技术栈、路由 379 条、38 张表、权限体系、许可证）不受影响。
+
 > 配套材料：`docs/API-INVENTORY.md`（接口清单）、`docs/DATABASE.md`（数据库结构）、`ARCHITECTURE.md`（我们的系统）、`UPGRADE.md`（同步机制）、`VERSION.md`（版本记录）。
 
 ## 一、审计范围与方法
@@ -20,9 +22,9 @@
 | # | 领导文档要求 | 结论 | 证据 |
 | ---: | --- | --- | --- |
 | 1 | Fork 官方仓库 | ❌ 形式不符 | `git merge-base HEAD upstream/main` 为空，首个提交只含 `writing-block.md`；与官方无共同祖先，不是从官方分出来的副本。双远程已接，能拉官方 tag。补齐方式见第十一节 |
-| 2 | 锁定当前稳定 Release | ✅ | `backend/UPSTREAM.md`、`VERSION.md`、`UPGRADE.md` 三处一致记 `v1.0.0-rc.49` + `48a6c87` + 发布日期 |
+| 2 | 锁定当前稳定 Release | ✅ | `company/UPSTREAM.md`、`VERSION.md`、`UPGRADE.md` 三处一致记 `v1.0.0-rc.49` + `48a6c87` + 发布日期 |
 | 3 | 核实技术栈 | ✅ | 本文第三节，与官方 `AGENTS.md`、`go.mod`、`web/package.json` 对得上 |
-| 4 | 核实前后端目录 | ✅ | 本文第四节；已修正架构文档里「`frontend/packages/ui`」这个实际不存在的条目 |
+| 4 | 核实前后端目录 | ✅ | 本文第四节；已修正架构文档里「`company/portal/packages/ui`」这个实际不存在的条目 |
 | 5 | 核实官方 API 路由 | ✅ | 实测 **379 条**，见 `docs/API-INVENTORY.md`；口径：一条注册算一条，循环注册的 44 条与内联 2 条已计入，注释不计 |
 | 6 | 核实数据库结构和迁移机制 | ✅ | 实测 **38 张表、472 个字段、0 条外键**，迁移靠启动时 `AutoMigrate`，见 `docs/DATABASE.md` |
 | 7 | 核实管理员权限体系 | ✅ | 本文第七节：三级角色 + 路由层 `AdminAuth`/`RootAuth` + Casbin 细粒度权限 |
@@ -35,8 +37,8 @@
 | 层 | 官方选型 | 依据 |
 | --- | --- | --- |
 | 后端 | Go 1.26、Gin、GORM v2 | `backend/go.mod`、`AGENTS.md` |
-| 管理前端 | React 19、Rsbuild 2、TanStack Router/Query/Table、Zustand、Base UI、Tailwind CSS 4、Bun | `backend/web/package.json`、`web/AGENTS.md` |
-| 主数据库 | SQLite / MySQL ≥ 5.7.8 / PostgreSQL ≥ 9.6 三选一（本项目用 PostgreSQL 15） | `AGENTS.md`、`backend/docker-compose.company.yml` |
+| 管理前端 | React 19、Rsbuild 2、TanStack Router/Query/Table、Zustand、Base UI、Tailwind CSS 4、Bun | `web/package.json`、`web/AGENTS.md` |
+| 主数据库 | SQLite / MySQL ≥ 5.7.8 / PostgreSQL ≥ 9.6 三选一（本项目用 PostgreSQL 15） | `AGENTS.md`、`company/docker-compose.company.yml` |
 | 日志库 | 可独立配库，支持 ClickHouse | `AGENTS.md`、`model/main.go` 的 `LOG_DB` 分支 |
 | 缓存 | Redis（go-redis）+ 进程内缓存 | `AGENTS.md`、`common/redis.go` |
 | 鉴权 | 浏览器会话、JWT、Personal Access Token、WebAuthn/Passkey、TOTP、OAuth/OIDC、Casbin 授权 | `AGENTS.md`、`router/api-router.go`、`service/authz/` |
@@ -75,7 +77,7 @@ New API/
 │   ├── apps/console/        用户控制台
 │   └── packages/            api-client / design-tokens / types（没有 ui 包，组件在各自 app 内）
 ├── deploy/nginx/            反向代理
-├── company-patches/         补丁文件与清单
+├── company/patches/         补丁文件与清单
 ├── scripts/                 升级、发版、冒烟、导出脚本
 └── docs/                    本报告、接口清单、数据库结构
 ```
@@ -127,7 +129,7 @@ New API/
 
 ## 七、管理员权限体系
 
-三级角色，定义在 `backend/common/`：
+三级角色，定义在 `common/`：
 
 | 角色 | 常量值 | 含义 |
 | --- | ---: | --- |
@@ -161,12 +163,12 @@ New API/
 
 **必须改代码、重新构建镜像**
 
-- 主色调（`backend/web/src/styles/theme.css` 里的 CSS 变量）
+- 主色调（`web/src/styles/theme.css` 里的 CSS 变量）
 - 布局、组件形态、导航结构
 
 我们的做法：
 
-- 主色走补丁 `P-001`（7 个颜色变量，不动布局），登记在 `backend/PATCHES.md` 与 `company-patches/manifest.json`，升级时脚本自动重放。
+- 主色走补丁 `P-001`（7 个颜色变量，不动布局），登记在 `company/patches/PATCHES.md` 与 `company/patches/manifest.json`，升级时脚本自动重放。
 - Logo、平台名称、favicon 等公司素材到位后**在后台配**，不打补丁、不重新构建。
 - 这条边界决定了上线顺序：先部署，再在后台换 Logo 和名称，不需要发一次版。
 
@@ -216,7 +218,7 @@ git status
 | # | 禁止事项 | 结论 | 证据 |
 | ---: | --- | --- | --- |
 | 1 | 改造成无法跟随官方升级的深度 Fork | 未违背 | 后端 0 行业务改动、只 7 行颜色；升级脚本用 rc.49 演练零差异，官方发新版一条命令可跟。注意：形式上是新建库不是 Fork（Phase 0 第 1 项记 🟡），但这条禁止的是「改到跟不动」，我们跟得动 |
-| 2 | 把公司业务写进 New API 核心 | 未违背 | `backend/` 与官方 v1.0.0-rc.49 逐文件比对只差 5 个：`theme.css`（7 行颜色）+ 4 个自建部署文件；业务全在 `frontend/` 三块界面 |
+| 2 | 把公司业务写进 New API 核心 | 未违背 | `backend/` 与官方 v1.0.0-rc.49 逐文件比对只差 5 个：`theme.css`（7 行颜色）+ 4 个自建部署文件；业务全在 `company/portal/` 三块界面 |
 | 3 | 删除或破坏官方管理员功能 | 未违背 | 官方管理后台原样保留（只换色），`/api` 管理接口 316 条全在，见 `docs/API-INVENTORY.md` |
 | 4 | 用前端隐藏按钮代替后端权限控制 | 未违背 | 控制台只调用户级接口（`UserAuth`），没有管理员功能入口；官方后台的 admin/root 权限由后端 `AdminAuth`/`RootAuth` + Casbin 校验，管理路由 40+ 处逐条挂中间件 |
 | 5 | 用模拟数据冒充真实消费统计 | 未违背 | 控制台与官网数据全部来自 `/api/*`；代码里搜不到 mock/假数据；价格拉不到时显示「价格暂时不可用」，不填假数字 |
@@ -286,7 +288,7 @@ upstream  → 官方仓库（只 fetch，永不 push）
 | 官方架构审计报告 | 本文 |
 | 官方 API 接口清单 | `docs/API-INVENTORY.md`（脚本导出，379 条） |
 | 数据库结构报告 | `docs/DATABASE.md`（实测 38 表 / 472 字段） |
-| 二开边界说明 | 本文第十节 + `ARCHITECTURE.md` 第二、八节 + `backend/PATCHES.md` |
+| 二开边界说明 | 本文第十节 + `ARCHITECTURE.md` 第二、八节 + `company/patches/PATCHES.md` |
 | Git 管理方案 | `UPGRADE.md` 第八节（双远程、四条分支、发版脚本） |
 | 升级验证方案 | `UPGRADE.md` 第四节（13 项检查）+ `scripts/smoke-test.ps1` |
 
