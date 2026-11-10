@@ -12,6 +12,7 @@
   "dependencies": {
     "@portal/api-client": "workspace:*",
     "@portal/design-tokens": "workspace:*",
+    "@portal/pricing": "workspace:*",
     "@portal/types": "workspace:*",
     "next": "16.4.5",
     "react": "19.3.1",

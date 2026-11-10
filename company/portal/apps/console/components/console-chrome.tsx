@@ -220,7 +220,7 @@ export function ConsoleTopbar({
         之前导航紧贴 logo 左边、字号 15px，和官网不成一套。
       */}
       <header className="fixed inset-x-0 top-0 z-40 border-b border-line bg-surface/95 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-[1600px] items-center justify-between px-6 2xl:h-[72px] 2xl:px-10">
+        <div className="flex h-16 w-full items-center justify-between px-6 2xl:h-[72px] 2xl:px-10">
           <a href={siteUrl} className="flex shrink-0 items-center gap-2.5">
             <span className="flex h-8 w-8 items-center justify-center rounded-md bg-brand text-sm font-semibold text-white">
               {BRAND_INITIAL}

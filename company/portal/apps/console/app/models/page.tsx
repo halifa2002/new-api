@@ -3,7 +3,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { modelsApi, ApiError } from '@portal/api-client';
+import { modelsApi, systemApi, ApiError } from '@portal/api-client';
+import {
+  computePrice,
+  summarizePrice,
+  type Conversion,
+  type ModelPrice,
+  type PricingRow,
+} from '@portal/pricing';
 import { CATEGORY_ORDER, findCatalogEntry } from '@portal/types';
 import { ConsoleSidebar, ConsoleTopbar } from '@/components/console-chrome';
 
@@ -23,13 +30,36 @@ export default function ConsoleModelsPage() {
   const [error, setError] = useState('');
   const [keyword, setKeyword] = useState('');
   const [category, setCategory] = useState<string>('全部');
+  /** 模型名 → 解析后的价格（分时模型含多个档位） */
+  const [prices, setPrices] = useState<Map<string, ModelPrice>>(new Map());
 
   const load = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
-      const data = await modelsApi.listUserModels();
+      const [data, status, pricing] = await Promise.all([
+        modelsApi.listUserModels(),
+        systemApi.getStatus().catch(() => null),
+        modelsApi.listPricing().catch(() => null),
+      ]);
       setModels(Array.isArray(data) ? data : []);
+
+      // 价格：换算参数取自 /api/status，单价取自 /api/pricing 的计费表达式
+      const conv: Conversion = {
+        quotaPerUsd: Number(status?.quota_per_unit) || 500_000,
+        usdToCny: Number(status?.usd_exchange_rate) || 7.3,
+      };
+      const raw = pricing as unknown;
+      const pricingRows: PricingRow[] = Array.isArray(raw)
+        ? (raw as PricingRow[])
+        : ((raw as { data?: PricingRow[] })?.data ??
+          (raw as { models?: PricingRow[] })?.models ??
+          []);
+      const priceMap = new Map<string, ModelPrice>();
+      for (const row of pricingRows) {
+        priceMap.set(row.model_name, computePrice(row, conv));
+      }
+      setPrices(priceMap);
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) {
         router.replace('/login');
@@ -131,7 +161,9 @@ export default function ConsoleModelsPage() {
           </div>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((row) => (
+            {filtered.map((row) => {
+              const price = summarizePrice(prices.get(row.name) ?? { mode: 'unknown' });
+              return (
               <Link
                 key={row.name}
                 href={`/models/${encodeURIComponent(row.name)}`}
@@ -172,11 +204,23 @@ export default function ConsoleModelsPage() {
                   ))}
                 </div>
 
-                <div className="mt-3 text-[11px] text-brand opacity-0 transition-opacity group-hover:opacity-100">
+                <div className="mt-3 flex items-baseline gap-1.5">
+                  <span className="text-sm font-semibold tabular-nums text-ink">
+                    {price.text}
+                  </span>
+                  {price.hint && (
+                    <span className="rounded bg-surface-subtle px-1.5 py-0.5 text-[10px] text-ink-muted">
+                      {price.hint}
+                    </span>
+                  )}
+                </div>
+
+                <div className="mt-2 text-[11px] text-brand opacity-0 transition-opacity group-hover:opacity-100">
                   查看价格与调用示例 →
                 </div>
               </Link>
-            ))}
+              );
+            })}
           </div>
         )}
 

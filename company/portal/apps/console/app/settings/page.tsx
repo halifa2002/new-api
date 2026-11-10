@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -192,7 +192,7 @@ export default function SettingsPage() {
       <ConsoleTopbar title="账户设置" />
 
       <main className="px-6 py-6">
-        <div className="mx-auto max-w-[1200px]">
+        <div className="w-full">
           {error && (
             <div className="mb-5 rounded-card border border-red-200 bg-red-50 px-4 py-3 text-xs text-danger">
               {error}

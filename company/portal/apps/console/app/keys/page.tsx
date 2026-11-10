@@ -228,7 +228,7 @@ export default function KeysPage() {
       <ConsoleTopbar title="API 密钥" />
 
       <main className="px-6 py-6">
-        <div className="mx-auto max-w-[1400px]">
+        <div className="w-full">
           {error && !draft && (
             <div className="mb-5 rounded-card border border-red-200 bg-red-50 px-4 py-3 text-xs text-danger">
               {error}
@@ -253,7 +253,7 @@ export default function KeysPage() {
             </button>
           </div>
 
-          {/* 完整密钥（仅一次） */}
+          {/* 完整密钥 */}
           {revealed && (
             <div className="mb-5 rounded-card border border-amber-300 bg-amber-50 p-5">
               <div className="flex items-start gap-2">
@@ -265,7 +265,7 @@ export default function KeysPage() {
                     「{revealed.name}」的完整密钥
                   </div>
                   <div className="mt-1 text-xs text-ink-muted">
-                    这是唯一一次完整显示，关掉后就看不到了。
+                    这是你的完整密钥，请妥善保管、不要分享。关掉后，随时可以在列表里点「查看」再次复制。
                   </div>
                 </div>
               </div>
