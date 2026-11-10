@@ -15,7 +15,7 @@
 | 1 | **Company Edition Version** | `v0.1.0` | `git tag --list "company-*"` |
 | 2 | **New API Upstream Version** | `v1.0.0-rc.49` | `git tag --list "v1.0.0-rc.*" \| sort -V \| tail -1` |
 | 3 | **New API Commit SHA** | `48a6c87f9e7757fdc58e5be9bcb4f8281ad0dfd0` | `git rev-list -n 1 v1.0.0-rc.49` |
-| 4 | **Company Patch Version** | `P-001`（共 1 处：主题色） | 见 `backend/PATCHES.md` |
+| 4 | **Company Patch Version** | `P-001`（共 1 处：主题色） | 见 `company/patches/PATCHES.md` |
 | 5 | **Portal Version** | 与公司版同号 `v0.1.0` | 前后端同一仓库同一提交，见下表提交号 |
 | 6 | **Database Migration Version** | 无独立版本号（官方用 GORM AutoMigrate 自动建表，当前 38 张表） | `docker exec postgres psql -U root -d new-api -c "SELECT count(*) FROM pg_tables WHERE schemaname='public';"` |
 | 7 | **Docker Image Tag** | `company-newapi:0.3.0`（2026-11-10 15:40 已按 `docker-compose.company.yml` 重建 `:3000` 并核对镜像、版本串与前端主色） | `docker inspect new-api --format '{{.Config.Image}}'` |
@@ -59,4 +59,4 @@
 2. 构建并打镜像：`docker build -f Dockerfile.company -t company-newapi:X.Y.Z .`
 3. 更新本文件「当前版本」7 项 + 历史记录追加一行
 4. 提交推送
-5. 如改了官方代码，先更新 `backend/PATCHES.md` 再发版
+5. 如改了官方代码，先更新 `company/patches/PATCHES.md` 再发版
