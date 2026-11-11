@@ -844,7 +844,7 @@ docker exec postgres psql -U root -d new-api -t -c "SELECT count(*) FROM pg_tabl
 
 - 容器镜像 `company-newapi:0.3.0`，健康检查通过；
 - `GET /api/status` 返回 `version=v0.1.0-company`；
-- 前端产物含品牌色 `#4f46e5`（浅色/深色/ring 共 6 处），登录页主按钮已为靛蓝，截图见 `docs/screenshots/admin-login-branded-20261110-v2.png`。
+- 前端产物含品牌色 `#4f46e5`（浅色/深色/ring 共 6 处），登录页主按钮已为靛蓝，截图见本机 `docs/screenshots/admin-login-branded-20261110-v2.png`（截图不入库）。
 
 以后每次切换镜像，都要在本节与 `VERSION.md` 第 7 项同步记一笔，否则版本记录会再次对不上部署。
 

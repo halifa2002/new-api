@@ -179,4 +179,4 @@
 
 ## 截图存档
 
-`company/docs/screenshots/` 下 11 张：官网六个页面的桌面视图与两个手机端视图，另加 3 张参考站控制台截图（`ref-console-overview / ref-console-keys / ref-console-profile`，2026-11-10 归档，作设计与对比依据）。根目录不再保留临时截图。
+本机 `company/docs/screenshots/` 下 11 张（该目录已加入 `.gitignore`，截图只在本机留存、不入库）：官网六个页面的桌面视图与两个手机端视图，另加 3 张参考站控制台截图（`ref-console-overview / ref-console-keys / ref-console-profile`，2026-11-10 归档，作设计与对比依据）。根目录不再保留临时截图。

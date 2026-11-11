@@ -51,3 +51,6 @@ node_modules/
 out/
 dist/
 *.tsbuildinfo
+
+# 验收/对比截图只在本机留存，不入库
+company/docs/screenshots/
