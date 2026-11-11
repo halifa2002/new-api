@@ -4,17 +4,27 @@
 
 ## 这个仓库怎么长的
 
+按领导文档 3.1 / 3.2，项目由两个独立仓库组成：
+
 ```
-new-api/                     ← 官方代码在根目录，与官方仓库同一套布局
+new-api/                     ← 后端仓库：官方代码在根目录，与官方仓库同一套布局
 ├── router/ model/ relay/ web/ ...   官方代码（业务逻辑一行没改）
-└── company/                        我们的东西全在这里
-    ├── portal/                     品牌官网 + 用户控制台（Next.js monorepo）
+└── company/                        公司后端相关的内容全在这里
     ├── scripts/                    升级、发版、冒烟、接口导出脚本
     ├── deploy/                     反向代理配置（nginx）
     ├── patches/                    补丁清单与 P-001（7 行主题色）
     ├── docs/                       审计报告、接口清单、数据库结构、升级报告
     ├── Dockerfile                  公司镜像（基于官方镜像换二进制）
     └── docker-compose.company.yml  公司部署配置
+```
+
+```
+company-portal/              ← 前端仓库：与本仓库同级，单独做版本管理
+├── apps/website/                 品牌官网（:4101）
+├── apps/console/                 用户控制台（:4102）
+├── packages/                     共享包（api-client / ui / design-tokens / types / pricing）
+├── deploy/ · docs/ · tests/
+└── README.md
 ```
 
 为什么这样分：官方升级时，git 直接合并官方版本，我们只处理自己的改动（通常只有主题色那一处）。领导文档 3.3 要求「不把公司代码覆盖到官方代码上」，这个结构就是为此设计的。

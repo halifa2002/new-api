@@ -184,18 +184,12 @@ admin.<域名>  →  nginx  →  New API 官方管理后台（换过配色）
 
 ## 七、目录结构
 
+按领导文档第三章，前后端是两个独立 Git 仓库，目录同级：
+
 ```
-new-api/                          官方代码在仓库根，与官方仓库同一套布局
+new-api/                          后端仓库：官方代码在仓库根，与官方仓库同一套布局
 ├── router/ model/ relay/ web/ ... 官方后端与官方管理前端
-└── company/                      公司自有内容
-    ├── portal/                   Portal monorepo
-    │   ├── apps/website/         品牌官网
-    │   ├── apps/console/         用户控制台
-    │   └── packages/
-    │       ├── api-client/       官方接口封装
-    │       ├── ui/               共用界面零件
-    │       ├── design-tokens/    设计变量
-    │       └── types/            接口类型
+└── company/                      公司自有内容（后端侧）
     ├── deploy/nginx/             反向代理配置
     ├── patches/                  补丁清单与 P-001
     ├── scripts/                  升级、发版、冒烟、导出脚本
@@ -206,6 +200,19 @@ new-api/                          官方代码在仓库根，与官方仓库同�
     ├── ROLLBACK.md               回滚手册
     ├── VERSION.md                版本记录（7 项）
     └── UPGRADE.md                官方升级流程
+
+company-portal/                   前端仓库（与后端仓库同级，独立版本管理）
+├── apps/website/                 品牌官网
+├── apps/console/                 用户控制台
+├── packages/
+│   ├── api-client/               官方接口封装
+│   ├── ui/                       共用界面零件
+│   ├── design-tokens/            设计变量
+│   ├── types/                    接口类型
+│   └── pricing/                  价格换算
+├── deploy/                       前端部署配置
+├── docs/                         前端文档
+└── tests/                        前端测试
 ```
 
 ---
