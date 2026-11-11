@@ -26,7 +26,7 @@
 | 事项 | 状态 |
 | --- | --- |
 | New API 核心 | ✅ 已落地并跑通 |
-| Company Portal（官网+控制台） | ✅ 本机 3001 / 3002 |
+| Company Portal（官网+控制台） | ✅ 本机 4101 / 4102 |
 | Admin（用官方后台） | ✅ 原样可用 |
 | API 适配层 | ✅ 六个模块写完 |
 | 反向代理（域名、证书、转发） | 🟡 配置写好并验证过语法，**未真正部署**（缺服务器） |
@@ -170,10 +170,10 @@
 
 ## 命令备忘（本机跑起来）
 
-- 官方后台：`localhost:3000`
-- 品牌官网：`localhost:3001`（`cd company/portal/apps/website && npm run dev`）
-- 用户控制台：`localhost:3002`（`cd company/portal/apps/console && npm run dev`）
-- 单元测试：`cd company/portal/apps/website && npm run test:unit`
+- 官方后台：`localhost:4100`
+- 品牌官网：`localhost:4101`（`cd ../company-portal/apps/website && npm run dev`）
+- 用户控制台：`localhost:4102`（`cd ../company-portal/apps/console && npm run dev`）
+- 单元测试：`cd ../company-portal/apps/website && npm run test:unit`
 - 冒烟测试：`.\scripts\smoke-test.ps1 -ApiKey sk-xxx`
 - 管理员账号：`cdadmin`
 

@@ -19,7 +19,9 @@ services:
     restart: always
     command: --log-dir /app/logs
     ports:
-      - "3000:3000"
+      # 宿主端口避让 3000：本地跑 Node/前端/别的容器都爱抢 3000，映射到 4100 减少冲突。
+      # 容器内部仍是 3000，所以下面的 healthcheck 和服务本身都不用改。
+      - "4100:3000"
     volumes:
       - ./data:/data
       - ./logs:/app/logs

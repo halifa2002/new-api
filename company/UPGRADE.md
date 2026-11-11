@@ -121,10 +121,10 @@ git push origin develop
 领导文档 8.3 列了 13 项，**前六项必须过**：
 
 1. **后端能编译**：`go build ./...`
-2. **前端能构建**：`cd web && bun run build`，以及 `cd company/portal && bun install && bun run build`
-3. **能打开登录页**：浏览器访问 `localhost:3000`
+2. **前端能构建**：`cd web && bun run build`，以及 `cd ../company-portal && bun install && bun run build`
+3. **能打开登录页**：浏览器访问 `localhost:4100`
 4. **管理员能登录**：用 `cdadmin` 登录后台
-5. **用户控制台能登录**：`localhost:3002`，余额能显示
+5. **用户控制台能登录**：`localhost:4102`，余额能显示
 6. **模型列表能出来**：控制台「模型广场」不报错
 7. **API Key 能建能删**
 8. **模型实际调用正常**：`scripts/smoke-test.ps1` 覆盖

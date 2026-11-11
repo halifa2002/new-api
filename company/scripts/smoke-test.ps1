@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
     升级后冒烟测试 —— 对照领导文档 8.3「自动化检查」的 13 项。
 
@@ -26,7 +26,7 @@
     本文件必须以 UTF-8 with BOM 保存，否则 Windows PowerShell 会按 GBK 读取，中文全部乱码。
 #>
 param(
-    [string]$BaseUrl = 'http://localhost:3000',
+    [string]$BaseUrl = 'http://localhost:4100',
     [string]$ApiKey = '',
     [string]$AdminUser = '',
     [string]$AdminPass = '',
@@ -316,7 +316,7 @@ else {
 
 # ── 11~13. 无法脚本化的三项 ────────────────────────────────────────────
 Write-Result '官方后端编译' 'MANUAL' '在升级流程里执行 go build ./...'
-Write-Result '公司前端构建' 'MANUAL' '执行 npm run build（company/portal/apps/website 与 console）'
+Write-Result '公司前端构建' 'MANUAL' '执行 npm run build（../company-portal/apps/website 与 console）'
 Write-Result 'Docker 镜像构建' 'MANUAL' '执行 cd web && bun run build；回根后 docker build -f company/Dockerfile -t company-newapi:<tag> .'
 
 # ── 汇总 ──────────────────────────────────────────────────────────────

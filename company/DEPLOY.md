@@ -60,7 +60,7 @@ docker push registry.example.com/company-newapi:<版本号>
 官网是 Next.js 静态导出，构建产物直接交给 nginx。
 
 ```bash
-cd company/portal/apps/website
+cd ../company-portal/apps/website
 # 关键：这两个环境变量决定页面上显示的 API 地址和控制台地址
 NEXT_PUBLIC_API_BASE_URL=https://api.example.com \
 NEXT_PUBLIC_CONSOLE_URL=https://console.example.com \
@@ -243,7 +243,7 @@ pwsh -File scripts/smoke-test.ps1 -BaseUrl https://api.example.com -ApiKey sk-xx
 | --- | --- | --- |
 | 后端起不来，日志报数据库连接失败 | `SQL_DSN` 密码错，或 postgres 还没 ready | 看 `docker logs postgres`，确认健康后重启 new-api |
 | 打开域名是 404 | nginx 没挂上 conf.d，或 server_name 不匹配 | `docker exec nginx nginx -T` 看生效配置 |
-| 后台打开还是营销主页 | 访问的是 3000 端口直连，没走 nginx | 用域名访问，不要用 IP:3000 |
+| 后台打开还是营销主页 | 访问的是 4100 端口直连，没走 nginx | 用域名访问，不要用 IP:4100 |
 | 登录后立刻掉线 | 三个域名不同导致 cookie 不共享 | 确认控制台、后台各自独立子域名且 `X-Forwarded-Proto` 正确 |
 | 页面示例里还是 `api.example.com` | 构建时没设 `NEXT_PUBLIC_API_BASE_URL` | 带上环境变量重新 `npm run build` |
 | HTTPS 打开白屏、控制台报混合内容 | 页面里写死了 http 地址 | 检查环境变量与 nginx `X-Forwarded-Proto` |

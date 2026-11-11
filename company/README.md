@@ -23,9 +23,9 @@ new-api/                     ← 官方代码在根目录，与官方仓库同�
 
 | 做什么 | 在哪执行 | 命令 |
 | --- | --- | --- |
-| 本地起官网 | `company/portal` | `npm run dev`（:3001） |
-| 本地起控制台 | `company/portal` | `npm run dev`（:3002） |
-| 起官方后台 | 仓库根 | `docker compose -f company/docker-compose.company.yml up -d`（:3000） |
+| 本地起官网 | `../company-portal` | `npm run dev`（:4101） |
+| 本地起控制台 | `../company-portal` | `npm run dev`（:4102） |
+| 起官方后台 | 仓库根 | `docker compose -f company/docker-compose.company.yml up -d`（:4100） |
 | 跟官方升级 | 仓库根 | `company\scripts\upgrade-official.ps1 -Tag <官方tag>` |
 | 跑冒烟测试 | 仓库根 | `company\scripts\smoke-test.ps1 -ApiKey sk-xxx` |
 | 导出接口清单 | 仓库根 | `node company/scripts/export-api-inventory.mjs` |

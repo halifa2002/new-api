@@ -46,10 +46,10 @@ admin.<域名>  →  nginx  →  New API 官方管理后台（换过配色）
 | --- | --- | --- | --- |
 | New API 后端 | 仓库根目录 | 用户、渠道、路由、计费、日志，全部核心业务 | **只改品牌色，不改业务逻辑** |
 | 管理后台前端 | `web/` | 官方管理界面 | 只换 logo/名称/主色/favicon |
-| 品牌官网 | `company/portal/apps/website/` | 对外展示，静态导出 | 完全自研，随便改 |
-| 用户控制台 | `company/portal/apps/console/` | 注册登录、Key、用量、账单 | 完全自研，随便改 |
-| API 适配层 | `company/portal/packages/api-client/` | 封装所有对官方 API 的调用 | 完全自研 |
-| 设计变量 | `company/portal/packages/design-tokens/` | 颜色、字体、间距、圆角 | 单一真源，页面不许自定义 |
+| 品牌官网 | `../company-portal/apps/website/` | 对外展示，静态导出 | 完全自研，随便改 |
+| 用户控制台 | `../company-portal/apps/console/` | 注册登录、Key、用量、账单 | 完全自研，随便改 |
+| API 适配层 | `../company-portal/packages/api-client/` | 封装所有对官方 API 的调用 | 完全自研 |
+| 设计变量 | `../company-portal/packages/design-tokens/` | 颜色、字体、间距、圆角 | 单一真源，页面不许自定义 |
 | 反向代理 | `deploy/nginx/` | 域名、HTTPS、转发、静态资源 | 完全自研 |
 
 **架构红线**（来自领导文档第二章）：
@@ -226,9 +226,9 @@ new-api/                          官方代码在仓库根，与官方仓库同�
 
 | 想改什么 | 改哪里 | 要重新构建什么 |
 | --- | --- | --- |
-| 官网文案/样式/页面 | `company/portal/apps/website/` | 官网静态站（`npm run build`） |
-| 控制台页面 | `company/portal/apps/console/` | 控制台服务 |
-| 品牌名/域名/邮箱 | `company/portal/apps/*/lib/brand.ts` | 官网 + 控制台 |
+| 官网文案/样式/页面 | `../company-portal/apps/website/` | 官网静态站（`npm run build`） |
+| 控制台页面 | `../company-portal/apps/console/` | 控制台服务 |
+| 品牌名/域名/邮箱 | `../company-portal/apps/*/lib/brand.ts` | 官网 + 控制台 |
 | 后台主色 | `web/src/styles/theme.css` | **必须重建后端镜像** |
 | 后台 Logo / 名称 / favicon | 后台系统设置（可配，无需构建） | 不用构建 |
 | 模型价格 | 后台「模型定价」 | 官网重新构建后价格才更新 |
@@ -238,7 +238,7 @@ new-api/                          官方代码在仓库根，与官方仓库同�
 
 ## 十、已知约束
 
-1. **同 host 不同端口会互相顶掉登录**——3000 和 3002 共享 cookie。生产必须分不同子域名。
+1. **同 host 不同端口会互相顶掉登录**——4100 和 4102 共享 cookie。生产必须分不同子域名。
 2. **后台换皮必须重建镜像**——跑的是预构建镜像，改本地文件不生效。
 3. **官网价格是构建时快照**——后台调价后要重新发布，不是实时。
 4. **官方用 GORM AutoMigrate，没有迁移编号**——数据库版本用「表数量 + 备份时间」当锚点。
