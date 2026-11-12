@@ -122,14 +122,49 @@ func TestCreateLoginSessionEnforcesActiveLimitAcrossAuthVersions(t *testing.T) {
 	}
 	require.NoError(t, model.DB.Create(&rows).Error)
 
-	_, err := CreateLoginSession(user.Id, "password", "127.0.0.1", "test-agent")
+	_, err := CreateLoginSession(user.Id, "password", "127.0.0.1", "test-agent-a")
 	require.NoError(t, err, "49 active sessions must allow creation of the 50th")
 
-	_, err = CreateLoginSession(user.Id, "password", "127.0.0.1", "test-agent")
+	// 换一个 User-Agent：同一台设备重复登录会被「就地续用」，那样就测不到上限了
+	_, err = CreateLoginSession(user.Id, "password", "127.0.0.1", "test-agent-b")
 	assert.ErrorIs(t, err, model.ErrUserSessionLimit)
 	var count int64
 	require.NoError(t, model.DB.Model(&model.UserSession{}).Count(&count).Error)
 	assert.Equal(t, int64(50), count)
+}
+
+// 同一台设备（同 IP + 同浏览器）反复登录，只应占一个在线名额、只留一条记录。
+func TestCreateLoginSessionReplacesSameDeviceSession(t *testing.T) {
+	useTestSessionSecret(t)
+	user := setupAuthSessionTestDB(t)
+	common.UserSessionActiveLimit = 50
+	common.UserSessionIssuanceLimit = 100
+	common.UserSessionIssuanceWindowSeconds = 60
+
+	first, err := CreateLoginSession(user.Id, "password", "127.0.0.1", "test-agent")
+	require.NoError(t, err)
+
+	second, err := CreateLoginSession(user.Id, "password", "127.0.0.1", "test-agent")
+	require.NoError(t, err)
+	assert.NotEqual(t, first.Session.SID, second.Session.SID, "重登必须换新会话，不能复用旧凭据")
+
+	var active []model.UserSession
+	require.NoError(t, model.DB.Where("user_id = ? AND status = ?", user.Id, model.UserSessionStatusActive).Find(&active).Error)
+	require.Len(t, active, 1, "同一台设备只应留下一条在线记录")
+	assert.Equal(t, second.Session.SID, active[0].SID)
+
+	// 旧会话应被标成「同设备重登」而不是留着装在线
+	var old model.UserSession
+	require.NoError(t, model.DB.Where("sid = ?", first.Session.SID).First(&old).Error)
+	assert.Equal(t, model.UserSessionStatusRevoked, old.Status)
+	assert.Equal(t, "relogin_same_device", old.RevokedReason)
+
+	// 换一台设备（不同浏览器指纹）仍应各自独立
+	_, err = CreateLoginSession(user.Id, "password", "10.0.0.8", "another-agent")
+	require.NoError(t, err)
+	var activeCount int64
+	require.NoError(t, model.DB.Model(&model.UserSession{}).Where("user_id = ? AND status = ?", user.Id, model.UserSessionStatusActive).Count(&activeCount).Error)
+	assert.Equal(t, int64(2), activeCount)
 }
 
 func TestCreateLoginSessionEnforcesIssuanceLimitAcrossAllStatuses(t *testing.T) {

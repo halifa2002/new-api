@@ -71,6 +71,19 @@ func createLoginSession(userID int, expectedAuthVersion int64, loginMethod, ip, 
 	if expectedAuthVersion > 0 && user.AuthVersion != expectedAuthVersion {
 		return nil, ErrLoginSessionRevoked
 	}
+	// 同一台设备（同 IP + 同浏览器）重新登录时，先把旧会话作废，只留这一条新的。
+	// 不这么做的话，用户在同一个浏览器里每登一次就多一条记录，控制台的设备列表
+	// 会把「登录了 23 次」显示成「23 台设备」，并且迟早顶到 ACTIVE_LIMIT 登不进去。
+	// 截断规则必须和 newLoginSession 一致，否则和库里存的值对不上、匹配不到。
+	if _, err := model.RevokeDeviceUserSessions(
+		userID,
+		truncateAuthMetadata(ip, 64),
+		truncateAuthMetadata(userAgent, 512),
+		"",
+		"relogin_same_device",
+	); err != nil {
+		return nil, err
+	}
 	now := time.Now().Unix()
 	activeCount, err := model.CountActiveUserSessions(userID, now)
 	if err != nil {

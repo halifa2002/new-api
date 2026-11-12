@@ -731,7 +731,29 @@ func RevokeAllUserSessions(userID int, reason string) (int64, error) {
 	return revokeUserSessions(userID, "", reason)
 }
 
+// RevokeDeviceUserSessions 作废同一账号下、同一台设备（IP + User-Agent）的其它在线会话。
+//
+// 为什么需要：登录接口每叫一次就新建一条会话，而控制台的列表把「一条会话」当成
+// 「一台设备」。同一台机器反复登录，设备列表就越攒越长，最后顶到
+// USER_SESSION_ACTIVE_LIMIT 把账号自己锁在门外。同一个 IP + 同一个浏览器
+// 在业务上就是同一台设备，在这里重新登录说明是同一处换了个会话，旧的该让位。
+//
+// 空 IP 或空 User-Agent 一律不参与匹配：那种情况下无法区分设备，
+// 按空值匹配会把该账号的所有会话一起废掉。
+func RevokeDeviceUserSessions(userID int, ip, userAgent, excludedSID, reason string) (int64, error) {
+	if userID <= 0 || ip == "" || userAgent == "" {
+		return 0, nil
+	}
+	return revokeUserSessionsScoped(userID, excludedSID, reason, func(query *gorm.DB) *gorm.DB {
+		return query.Where("ip = ? AND user_agent = ?", ip, userAgent)
+	})
+}
+
 func revokeUserSessions(userID int, excludedSID, reason string) (int64, error) {
+	return revokeUserSessionsScoped(userID, excludedSID, reason, nil)
+}
+
+func revokeUserSessionsScoped(userID int, excludedSID, reason string, scope func(*gorm.DB) *gorm.DB) (int64, error) {
 	if userID <= 0 {
 		return 0, ErrUserSessionInvalid
 	}
@@ -741,6 +763,9 @@ func revokeUserSessions(userID int, excludedSID, reason string) (int64, error) {
 		query := DB.Where("user_id = ? AND status = ? AND expires_at > ?", userID, UserSessionStatusActive, now)
 		if excludedSID != "" {
 			query = query.Where("sid <> ?", excludedSID)
+		}
+		if scope != nil {
+			query = scope(query)
 		}
 		var candidates []UserSession
 		if err := query.Order("sid").Limit(userSessionRevokeBatchSize).Find(&candidates).Error; err != nil {

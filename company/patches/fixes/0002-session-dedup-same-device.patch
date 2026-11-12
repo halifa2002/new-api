@@ -1,0 +1,126 @@
+diff --git a/model/user_session.go b/model/user_session.go
+index 8283af00..26123d2e 100644
+--- a/model/user_session.go
++++ b/model/user_session.go
+@@ -731,7 +731,29 @@ func RevokeAllUserSessions(userID int, reason string) (int64, error) {
+ 	return revokeUserSessions(userID, "", reason)
+ }
+ 
++// RevokeDeviceUserSessions 作废同一账号下、同一台设备（IP + User-Agent）的其它在线会话。
++//
++// 为什么需要：登录接口每叫一次就新建一条会话，而控制台的列表把「一条会话」当成
++// 「一台设备」。同一台机器反复登录，设备列表就越攒越长，最后顶到
++// USER_SESSION_ACTIVE_LIMIT 把账号自己锁在门外。同一个 IP + 同一个浏览器
++// 在业务上就是同一台设备，在这里重新登录说明是同一处换了个会话，旧的该让位。
++//
++// 空 IP 或空 User-Agent 一律不参与匹配：那种情况下无法区分设备，
++// 按空值匹配会把该账号的所有会话一起废掉。
++func RevokeDeviceUserSessions(userID int, ip, userAgent, excludedSID, reason string) (int64, error) {
++	if userID <= 0 || ip == "" || userAgent == "" {
++		return 0, nil
++	}
++	return revokeUserSessionsScoped(userID, excludedSID, reason, func(query *gorm.DB) *gorm.DB {
++		return query.Where("ip = ? AND user_agent = ?", ip, userAgent)
++	})
++}
++
+ func revokeUserSessions(userID int, excludedSID, reason string) (int64, error) {
++	return revokeUserSessionsScoped(userID, excludedSID, reason, nil)
++}
++
++func revokeUserSessionsScoped(userID int, excludedSID, reason string, scope func(*gorm.DB) *gorm.DB) (int64, error) {
+ 	if userID <= 0 {
+ 		return 0, ErrUserSessionInvalid
+ 	}
+@@ -742,6 +764,9 @@ func revokeUserSessions(userID int, excludedSID, reason string) (int64, error) {
+ 		if excludedSID != "" {
+ 			query = query.Where("sid <> ?", excludedSID)
+ 		}
++		if scope != nil {
++			query = scope(query)
++		}
+ 		var candidates []UserSession
+ 		if err := query.Order("sid").Limit(userSessionRevokeBatchSize).Find(&candidates).Error; err != nil {
+ 			return totalAffected, err
+diff --git a/service/auth_session.go b/service/auth_session.go
+index 5cd49920..cc0c775a 100644
+--- a/service/auth_session.go
++++ b/service/auth_session.go
+@@ -71,6 +71,19 @@ func createLoginSession(userID int, expectedAuthVersion int64, loginMethod, ip,
+ 	if expectedAuthVersion > 0 && user.AuthVersion != expectedAuthVersion {
+ 		return nil, ErrLoginSessionRevoked
+ 	}
++	// 同一台设备（同 IP + 同浏览器）重新登录时，先把旧会话作废，只留这一条新的。
++	// 不这么做的话，用户在同一个浏览器里每登一次就多一条记录，控制台的设备列表
++	// 会把「登录了 23 次」显示成「23 台设备」，并且迟早顶到 ACTIVE_LIMIT 登不进去。
++	// 截断规则必须和 newLoginSession 一致，否则和库里存的值对不上、匹配不到。
++	if _, err := model.RevokeDeviceUserSessions(
++		userID,
++		truncateAuthMetadata(ip, 64),
++		truncateAuthMetadata(userAgent, 512),
++		"",
++		"relogin_same_device",
++	); err != nil {
++		return nil, err
++	}
+ 	now := time.Now().Unix()
+ 	activeCount, err := model.CountActiveUserSessions(userID, now)
+ 	if err != nil {
+diff --git a/service/auth_session_test.go b/service/auth_session_test.go
+index 2d14a7cc..2868cfa4 100644
+--- a/service/auth_session_test.go
++++ b/service/auth_session_test.go
+@@ -122,16 +122,51 @@ func TestCreateLoginSessionEnforcesActiveLimitAcrossAuthVersions(t *testing.T) {
+ 	}
+ 	require.NoError(t, model.DB.Create(&rows).Error)
+ 
+-	_, err := CreateLoginSession(user.Id, "password", "127.0.0.1", "test-agent")
++	_, err := CreateLoginSession(user.Id, "password", "127.0.0.1", "test-agent-a")
+ 	require.NoError(t, err, "49 active sessions must allow creation of the 50th")
+ 
+-	_, err = CreateLoginSession(user.Id, "password", "127.0.0.1", "test-agent")
++	// 换一个 User-Agent：同一台设备重复登录会被「就地续用」，那样就测不到上限了
++	_, err = CreateLoginSession(user.Id, "password", "127.0.0.1", "test-agent-b")
+ 	assert.ErrorIs(t, err, model.ErrUserSessionLimit)
+ 	var count int64
+ 	require.NoError(t, model.DB.Model(&model.UserSession{}).Count(&count).Error)
+ 	assert.Equal(t, int64(50), count)
+ }
+ 
++// 同一台设备（同 IP + 同浏览器）反复登录，只应占一个在线名额、只留一条记录。
++func TestCreateLoginSessionReplacesSameDeviceSession(t *testing.T) {
++	useTestSessionSecret(t)
++	user := setupAuthSessionTestDB(t)
++	common.UserSessionActiveLimit = 50
++	common.UserSessionIssuanceLimit = 100
++	common.UserSessionIssuanceWindowSeconds = 60
++
++	first, err := CreateLoginSession(user.Id, "password", "127.0.0.1", "test-agent")
++	require.NoError(t, err)
++
++	second, err := CreateLoginSession(user.Id, "password", "127.0.0.1", "test-agent")
++	require.NoError(t, err)
++	assert.NotEqual(t, first.Session.SID, second.Session.SID, "重登必须换新会话，不能复用旧凭据")
++
++	var active []model.UserSession
++	require.NoError(t, model.DB.Where("user_id = ? AND status = ?", user.Id, model.UserSessionStatusActive).Find(&active).Error)
++	require.Len(t, active, 1, "同一台设备只应留下一条在线记录")
++	assert.Equal(t, second.Session.SID, active[0].SID)
++
++	// 旧会话应被标成「同设备重登」而不是留着装在线
++	var old model.UserSession
++	require.NoError(t, model.DB.Where("sid = ?", first.Session.SID).First(&old).Error)
++	assert.Equal(t, model.UserSessionStatusRevoked, old.Status)
++	assert.Equal(t, "relogin_same_device", old.RevokedReason)
++
++	// 换一台设备（不同浏览器指纹）仍应各自独立
++	_, err = CreateLoginSession(user.Id, "password", "10.0.0.8", "another-agent")
++	require.NoError(t, err)
++	var activeCount int64
++	require.NoError(t, model.DB.Model(&model.UserSession{}).Where("user_id = ? AND status = ?", user.Id, model.UserSessionStatusActive).Count(&activeCount).Error)
++	assert.Equal(t, int64(2), activeCount)
++}
++
+ func TestCreateLoginSessionEnforcesIssuanceLimitAcrossAllStatuses(t *testing.T) {
+ 	useTestSessionSecret(t)
+ 	user := setupAuthSessionTestDB(t)
