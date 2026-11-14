@@ -73,20 +73,27 @@ function Invoke-Api {
     )
 
     $uri = "$BaseUrl$Path"
-    $params = @{
-        Uri             = $uri
-        Method          = $Method
-        Headers         = $Headers
-        TimeoutSec      = 30
-        UseBasicParsing = $true
-    }
-    if ($null -ne $Body) {
-        $params.Body = ($Body | ConvertTo-Json -Depth 8)
-        $params.ContentType = 'application/json'
-    }
+    $json = $null
+    if ($null -ne $Body) { $json = ($Body | ConvertTo-Json -Depth 8) }
+    $hasHeaders = ($Headers -and $Headers.Count -gt 0)
 
     try {
-        $resp = Invoke-WebRequest @params
+        # 注意：这里不能用 $params 哈希 + @params 展开。
+        # 本机 Windows PowerShell 5.1（build 26200）在 splat 传 Headers 为空/缺失时
+        # 会让整个进程静默退出（exit 0，无任何报错）。改为显式参数写死四种组合。
+        if ($hasHeaders) {
+            if ($null -ne $json) {
+                $resp = Invoke-WebRequest -Uri $uri -Method $Method -Headers $Headers -TimeoutSec 30 -UseBasicParsing -Body $json -ContentType 'application/json'
+            } else {
+                $resp = Invoke-WebRequest -Uri $uri -Method $Method -Headers $Headers -TimeoutSec 30 -UseBasicParsing
+            }
+        } else {
+            if ($null -ne $json) {
+                $resp = Invoke-WebRequest -Uri $uri -Method $Method -TimeoutSec 30 -UseBasicParsing -Body $json -ContentType 'application/json'
+            } else {
+                $resp = Invoke-WebRequest -Uri $uri -Method $Method -TimeoutSec 30 -UseBasicParsing
+            }
+        }
         return @{ Ok = $true; Status = [int]$resp.StatusCode; Body = ($resp.Content | ConvertFrom-Json) }
     }
     catch {
@@ -270,10 +277,10 @@ if ($sessionToken) {
 
     if ($created.Ok -and $created.Body.success) {
         # 官方接口创建成功后不直接返回 id，回查最近一条
-        $list = Invoke-Api -Path '/api/token/?p=0&size=10' -Headers @{ Authorization = "Bearer $sessionToken" }
+        $list = Invoke-Api -Path '/api/token/?p=0&page_size=20' -Headers @{ Authorization = "Bearer $sessionToken" }
         $newKey = $null
         if ($list.Ok -and $list.Body.data) {
-            $newKey = @($list.Body.data) | Where-Object { $_.name -like 'smoke-test-*' } | Select-Object -First 1
+            $newKey = @($list.Body.data.items) | Where-Object { $_.name -like 'smoke-test-*' } | Select-Object -First 1
         }
 
         if ($newKey) {
@@ -330,3 +337,4 @@ if ($script:failed -gt 0) {
 
 Write-Host '自动检查全部通过，再完成人工三项即可放行。' -ForegroundColor Green
 exit 0
+
