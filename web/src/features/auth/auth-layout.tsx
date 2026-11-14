@@ -46,13 +46,21 @@ export function AuthLayout({ children }: AuthLayoutProps) {
   return (
     <div className='grid min-h-svh lg:grid-cols-[1.1fr_1fr]'>
       <aside className='relative hidden flex-col justify-between overflow-hidden bg-slate-950 px-12 py-14 text-slate-100 lg:flex'>
+        {/* 复用官网首屏那张云图（apps/website/public/hero/canvas-cool.webp），
+            压一层深蓝渐变后当暗底纹理，与官网「收尾 CTA」的做法一致。 */}
         <div
           aria-hidden='true'
-          className='pointer-events-none absolute -top-32 -left-24 size-[28rem] rounded-full bg-indigo-500/25 blur-3xl'
+          className='absolute inset-0 bg-cover bg-center bg-no-repeat opacity-80'
+          style={{ backgroundImage: "url('/login-hero.webp')" }}
         />
         <div
           aria-hidden='true'
-          className='pointer-events-none absolute -right-24 bottom-0 size-[22rem] rounded-full bg-sky-400/20 blur-3xl'
+          className='absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-950/78 to-indigo-950/66'
+        />
+        {/* 底部压暗：保住「管理后台 · 仅限授权人员」这行小字的对比度 */}
+        <div
+          aria-hidden='true'
+          className='absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-slate-950 via-slate-950/70 to-transparent'
         />
 
         <Link
