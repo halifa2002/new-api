@@ -18,7 +18,7 @@
 | 4 | **Company Patch Version** | `P-001`（共 1 处：主题色） | 见 `company/patches/PATCHES.md` |
 | 5 | **Portal Version** | 与公司版同号 `v0.1.0` | 前后端同一仓库同一提交，见下表提交号 |
 | 6 | **Database Migration Version** | 无独立版本号（官方用 GORM AutoMigrate 自动建表，当前 38 张表） | `docker exec postgres psql -U root -d new-api -c "SELECT count(*) FROM pg_tables WHERE schemaname='public';"` |
-| 7 | **Docker Image Tag** | `company-newapi:0.3.0`（2026-11-10 15:40 已按 `docker-compose.company.yml` 重建 `:3000` 并核对镜像、版本串与前端主色） | `docker inspect new-api --format '{{.Config.Image}}'` |
+| 7 | **Docker Image Tag** | `company-newapi:0.4.0`（2026-11-14 20:35 本地交叉编译后重建，`:3000` 实测版本串 `v0.1.0-company`、主色 `#4F46E5`） | `docker inspect new-api-dev --format '{{.Config.Image}}'` |
 
 补充信息（不属于 7 项，但排障要用）：
 
@@ -66,6 +66,7 @@ Logo / favicon 需把图形文件放进 `web/public/` 并重建镜像，再设�
 | 公司版本 | 官方版本 | 官方 SHA | 补丁 | 镜像标签 | 记录日期 |
 | --- | --- | --- | --- | --- | --- |
 | v0.1.0 | v1.0.0-rc.49 | `48a6c87` | P-001 | `company-newapi:0.3.0` | 2026-11-09 |
+| v0.1.0 | v1.0.0-rc.49 | `48a6c87` | P-001 | `company-newapi:0.4.0` | 2026-11-14 |
 
 > 新增版本时在表格追加一行，同时更新上面的「当前版本」区块。
 
@@ -78,3 +79,24 @@ Logo / favicon 需把图形文件放进 `web/public/` 并重建镜像，再设�
 3. 更新本文件「当前版本」7 项 + 历史记录追加一行
 4. 提交推送
 5. 如改了官方代码，先更新 `company/patches/PATCHES.md` 再发版
+
+---
+
+## 本地构建（Docker Hub 不可达时）
+
+2026-11-14 实测：本机 Docker 拉不到任何基础镜像（`registry-1.docker.io` 报 EOF；daocloud 只给 manifest，blob 落在不可达的 CDN）。可用路线：
+
+1. 前端：`bun install --frozen-lockfile --registry https://registry.npmmirror.com`，再 `VITE_REACT_APP_VERSION=$(cat VERSION) bun run build` → 产出 `web/dist`
+2. 后端：Go 1.26 交叉编译
+   `GOOS=linux GOARCH=amd64 CGO_ENABLED=0 GOWORK=off go build -trimpath -ldflags "-s -w -X github.com/QuantumNous/new-api/common.Version=v0.1.0-company" -o new-api .`
+3. 打包：以本地已有官方镜像为基座，不联网
+   `FROM calciumion/new-api:latest` + `COPY new-api /new-api`（见 `N:\gongsi\.data\build\Dockerfile`）
+4. 重启容器，沿用原参数：
+   `-v N:\gongsi\.data\new-api:/data -p 3000:3000 -p 4100:3000 -e TZ=Asia/Shanghai -e ERROR_LOG_ENABLED=true --restart unless-stopped`
+
+已知坑：
+
+- 仓库根 `VERSION` 默认是 0 字节，必须写值，否则前后端版本串都是空
+- `go.exe` 只能写工作区内的路径，`GOPATH`/`GOCACHE`/`GOTMPDIR` 都要放 `N:\gongsi` 下（写 `E:` 会 `Access is denied`）
+- 上次构建被中断后，`GOCACHE` 可能残留脏条目，表现为 `unexpected NUL in input`（源文件本身是好文件）。删掉 `GOCACHE` 目录重来即可，实测 `go build ./common/` 能过但全量失败就是这种缓存污染
+- 静态 `index.html` 的 `<title>` 仍是 `New API`（属官方署名，按 AGPL 第 7 条不删）；运行时由 `/api/status` 的 `system_name` 覆盖为「虫洞 AI」
