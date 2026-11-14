@@ -1,4 +1,4 @@
-/*
+﻿/*
 Copyright (C) 2023-2026 QuantumNous
 
 This program is free software: you can redistribute it and/or modify
@@ -30,7 +30,7 @@ type AuthLayoutProps = {
  * 认证页外壳。
  *
  * 布局参考公司官网预览页（apps/website/preview/home）的视觉语言：
- * 深色品牌侧栏 + 浅色表单区，主色用品牌靛蓝，留白充足。
+ * 浅色云图品牌侧栏 + 浅色表单区，主色用品牌靛蓝，留白充足。
  * 小屏（< lg）收起侧栏，只保留顶部品牌行，避免表单被挤到首屏之外。
  */
 export function AuthLayout({ children }: AuthLayoutProps) {
@@ -45,29 +45,29 @@ export function AuthLayout({ children }: AuthLayoutProps) {
 
   return (
     <div className='grid min-h-svh lg:grid-cols-[1.1fr_1fr]'>
-      <aside className='relative hidden flex-col justify-between overflow-hidden bg-slate-950 px-12 py-14 text-slate-100 lg:flex'>
+      <aside className='relative hidden flex-col justify-between overflow-hidden bg-slate-50 px-12 py-14 text-slate-900 lg:flex'>
         {/* 复用官网首屏那张云图（apps/website/public/hero/canvas-cool.webp），
             压一层深蓝渐变后当暗底纹理，与官网「收尾 CTA」的做法一致。 */}
         <div
           aria-hidden='true'
-          className='absolute inset-0 bg-cover bg-center bg-no-repeat opacity-80'
+          className='absolute inset-0 bg-cover bg-center bg-no-repeat'
           style={{ backgroundImage: "url('/login-hero.webp')" }}
         />
         <div
           aria-hidden='true'
-          className='absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-950/78 to-indigo-950/66'
+          className='absolute inset-0 bg-gradient-to-br from-white/45 via-white/15 to-indigo-900/25'
         />
         {/* 底部压暗：保住「管理后台 · 仅限授权人员」这行小字的对比度 */}
         <div
           aria-hidden='true'
-          className='absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-slate-950 via-slate-950/70 to-transparent'
+          className='absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-white/80 via-white/35 to-transparent'
         />
 
         <Link
           to='/'
           className='relative z-10 flex items-center gap-3 transition-opacity hover:opacity-90'
         >
-          <div className='flex size-11 items-center justify-center overflow-hidden rounded-xl bg-white/10 ring-1 ring-white/15'>
+          <div className='flex size-11 items-center justify-center overflow-hidden rounded-xl bg-white ring-1 ring-slate-200'>
             {loading ? (
               <Skeleton className='size-full' />
             ) : (
@@ -86,22 +86,22 @@ export function AuthLayout({ children }: AuthLayoutProps) {
                 {systemName}
               </p>
             )}
-            <p className='text-[11px] font-medium tracking-[0.18em] text-slate-400'>
+            <p className='text-[11px] font-medium tracking-[0.18em] text-slate-500'>
               CHONGDONG AI
             </p>
           </div>
         </Link>
 
         <div className='relative z-10 space-y-6'>
-          <h2 className='max-w-md text-3xl leading-snug font-semibold tracking-tight'>
+          <h2 className='max-w-md text-3xl leading-snug font-semibold tracking-tight text-slate-900'>
             {t('Unified access to mainstream AI models')}
           </h2>
-          <ul className='space-y-3 text-sm text-slate-300'>
+          <ul className='space-y-3 text-sm text-slate-600'>
             {highlights.map((item) => (
               <li key={item} className='flex items-start gap-2.5'>
                 <span
                   aria-hidden='true'
-                  className='mt-1.5 size-1.5 shrink-0 rounded-full bg-indigo-400'
+                  className='mt-1.5 size-1.5 shrink-0 rounded-full bg-indigo-500'
                 />
                 <span>{item}</span>
               </li>
@@ -109,7 +109,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
           </ul>
         </div>
 
-        <p className='relative z-10 text-xs text-slate-500'>
+        <p className='relative z-10 text-xs font-medium text-slate-600'>
           {t('Admin console · authorized staff only')}
         </p>
       </aside>
@@ -128,3 +128,4 @@ export function AuthLayout({ children }: AuthLayoutProps) {
     </div>
   )
 }
+
