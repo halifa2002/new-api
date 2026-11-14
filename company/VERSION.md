@@ -1,4 +1,4 @@
-# 版本记录卡
+﻿# 版本记录卡
 
 对应领导文档 8.1「版本管理」：每个公司发行版本必须记录 7 项，且**不允许只记录公司自己的版本号**。
 
@@ -18,7 +18,7 @@
 | 4 | **Company Patch Version** | `P-001`（共 1 处：主题色） | 见 `company/patches/PATCHES.md` |
 | 5 | **Portal Version** | 与公司版同号 `v0.1.0` | 前后端同一仓库同一提交，见下表提交号 |
 | 6 | **Database Migration Version** | 无独立版本号（官方用 GORM AutoMigrate 自动建表，当前 38 张表） | `docker exec postgres psql -U root -d new-api -c "SELECT count(*) FROM pg_tables WHERE schemaname='public';"` |
-| 7 | **Docker Image Tag** | `company-newapi:0.4.0`（2026-11-14 20:35 本地交叉编译后重建，`:3000` 实测版本串 `v0.1.0-company`、主色 `#4F46E5`） | `docker inspect new-api-dev --format '{{.Config.Image}}'` |
+| 7 | **Docker Image Tag** | `company-newapi:0.5.0`（2026-11-14 21:20 加入双栏登录页后重建，`:3000` 实测版本串 `v0.1.0-company`、主色 `#4F46E5`、登录页为新版式） | `docker inspect new-api-dev --format '{{.Config.Image}}'` |
 
 补充信息（不属于 7 项，但排障要用）：
 
@@ -67,6 +67,7 @@ Logo / favicon 需把图形文件放进 `web/public/` 并重建镜像，再设�
 | --- | --- | --- | --- | --- | --- |
 | v0.1.0 | v1.0.0-rc.49 | `48a6c87` | P-001 | `company-newapi:0.3.0` | 2026-11-09 |
 | v0.1.0 | v1.0.0-rc.49 | `48a6c87` | P-001 | `company-newapi:0.4.0` | 2026-11-14 |
+| v0.1.0 | v1.0.0-rc.49 | `48a6c87` | P-001 | `company-newapi:0.5.0` | 2026-11-14 |
 
 > 新增版本时在表格追加一行，同时更新上面的「当前版本」区块。
 
@@ -100,3 +101,4 @@ Logo / favicon 需把图形文件放进 `web/public/` 并重建镜像，再设�
 - `go.exe` 只能写工作区内的路径，`GOPATH`/`GOCACHE`/`GOTMPDIR` 都要放 `N:\gongsi` 下（写 `E:` 会 `Access is denied`）
 - 上次构建被中断后，`GOCACHE` 可能残留脏条目，表现为 `unexpected NUL in input`（源文件本身是好文件）。删掉 `GOCACHE` 目录重来即可，实测 `go build ./common/` 能过但全量失败就是这种缓存污染
 - 静态 `index.html` 的 `<title>` 仍是 `New API`（属官方署名，按 AGPL 第 7 条不删）；运行时由 `/api/status` 的 `system_name` 覆盖为「虫洞 AI」
+
