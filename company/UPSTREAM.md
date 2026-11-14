@@ -4,7 +4,7 @@
 
 | 项目 | 值 |
 | --- | --- |
-| 上游仓库 | https://github.com/Calcium-Ion/new-api |
+| 上游仓库 | https://github.com/QuantumNous/new-api |
 | 基线版本 | v1.0.0-rc.49 |
 | 基线 Commit SHA | 48a6c87f9e7757fdc58e5be9bcb4f8281ad0dfd0 |
 | 发布日期 | 2026-11-08 |
