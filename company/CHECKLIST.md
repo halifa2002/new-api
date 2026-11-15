@@ -26,7 +26,7 @@
 | 事项 | 状态 |
 | --- | --- |
 | New API 核心 | ✅ 已落地并跑通 |
-| Company Portal（官网+控制台） | ✅ 本机 3001 / 3002 |
+| Company Portal（官网+控制台） | ✅ 本机 4101 / 4102；代码真源为独立仓 `company-portal`（`new-api/company/portal/` 是 2026-11-10 历史存档，已停止更新，勿在其中修改） |
 | Admin（用官方后台） | ✅ 原样可用 |
 | API 适配层 | ✅ 六个模块写完 |
 | 反向代理（域名、证书、转发） | 🟡 配置写好并验证过语法，**未真正部署**（缺服务器） |
@@ -39,7 +39,7 @@
 | 3.2 品牌前端仓库（monorepo） | 🟡 实际三个包：`api-client`、`design-tokens`、`types`；领导列的 `ui` 公共组件包未拆出去，组件在各 app 内 |
 | 两个仓库 vs 一个仓库 | 🟡 合并成一个，需向领导报备 |
 | 3.1 分支策略（main/develop/release） | ✅ `develop` 已对齐 main，发版走 `company/scripts/make-release.ps1` 一条命令，规则见 `company/UPGRADE.md` 第八节 |
-| 3.3 官方代码修改原则 | ✅ 一处配色补丁，补丁文件在 `company/patches/`，由 `company/scripts/upgrade-official.ps1` 自动重放 |
+| 3.3 官方代码修改原则 | ✅ 一处配色补丁；补丁文件与登记表在 `company/patches/`（`PATCHES.md` + `manifest.json`）；升级走 Fork 模式 `git merge` 官方 tag，冲突手工解决，**不做补丁重放** |
 
 # 四、UI 产品设计方案
 
@@ -170,10 +170,11 @@
 
 ## 命令备忘（本机跑起来）
 
-- 官方后台：`localhost:3000`
-- 品牌官网：`localhost:3001`（`cd company/portal/apps/website && npm run dev`）
-- 用户控制台：`localhost:3002`（`cd company/portal/apps/console && npm run dev`）
-- 单元测试：`cd company/portal/apps/website && npm run test:unit`
+- 官方后台：`localhost:3000`（公司镜像 `company-newapi:0.7.0`，`/api/status` 版本串 `v0.1.0-company`）
+- 品牌官网：`localhost:4101`（在 `N:\gongsi\company-portal` 根目录执行 `bun run dev`，同时起 4101 与 4102）
+- 用户控制台：`localhost:4102`
+- 单元测试：在 `N:\gongsi\company-portal` 执行 `bun --cwd apps/website run test:unit`
+- 前端代码真源：`N:\gongsi\company-portal`；`new-api/company/portal/` 为 2026-11-10 历史存档，勿在其中修改
 - 冒烟测试：`.\scripts\smoke-test.ps1 -ApiKey sk-xxx`
 - 管理员账号：`cdadmin`
 
