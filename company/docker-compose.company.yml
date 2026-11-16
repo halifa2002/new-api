@@ -7,7 +7,7 @@
 #   docker compose -f docker-compose.company.yml up -d
 #
 # 构建镜像（改了前端配色或代码后需重新执行）：
-#   docker build -t company-newapi:0.3.0 -t company-newapi:latest .
+#   docker build -t company-newapi:0.4.0 -t company-newapi:latest .
 #
 # ⚠️ 上线前必须改：SQL_DSN 与 REDIS_CONN_STRING 里的密码
 
