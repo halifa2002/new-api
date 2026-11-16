@@ -215,7 +215,7 @@ if ($ApiKey) {
                     Write-Result '额度扣减与消费一致' 'PASS' "扣减 $delta quota"
                 }
                 elseif ($delta -eq 0) {
-                    Write-Result '额度扣减与消费一致' 'FAIL' '调用成功但余额未变化，可能结算异常'
+                    Write-Result '额度扣减与消费一致' 'FAIL' '调用成功但余额未变化（-ApiKey 必须属于 -AdminUser 同一账号，否则扣的是别人余额，本项无法比对）'
                 }
                 else {
                     Write-Result '额度扣减与消费一致' 'FAIL' "余额增加了 $(-$delta)，数据可能被其它操作影响"
@@ -273,7 +273,10 @@ if ($sessionToken) {
         $list = Invoke-Api -Path '/api/token/?p=0&size=10' -Headers @{ Authorization = "Bearer $sessionToken" }
         $newKey = $null
         if ($list.Ok -and $list.Body.data) {
-            $newKey = @($list.Body.data) | Where-Object { $_.name -like 'smoke-test-*' } | Select-Object -First 1
+            # 官方 /api/token/ 返回分页对象 { page, page_size, total, items }，items 里才是数组。
+            # 旧写法把 data 当数组读，导致这条检查自建立起一直误报"回查不到记录"（2026-11-16 核实 rc.49 与 rc.51 该接口一致）。
+            $items = if ($null -ne $list.Body.data.items) { @($list.Body.data.items) } else { @($list.Body.data) }
+            $newKey = $items | Where-Object { $_.name -like 'smoke-test-*' } | Select-Object -First 1
         }
 
         if ($newKey) {
