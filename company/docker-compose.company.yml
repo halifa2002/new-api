@@ -14,7 +14,7 @@
 services:
   new-api:
     # ↓ 唯一与官方不同的一行：用公司自有镜像
-    image: company-newapi:0.3.0
+    image: company-newapi:0.4.0
     container_name: new-api
     restart: always
     command: --log-dir /app/logs

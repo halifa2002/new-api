@@ -6,28 +6,29 @@
 
 ---
 
-## 当前版本：v0.1.0
+## 当前版本：v0.2.0
 
-记录日期：2026-11-09
+记录日期：2026-11-16
 
 | # | 项目 | 值 | 怎么查 |
 | --- | --- | --- | --- |
-| 1 | **Company Edition Version** | `v0.1.0` | `git tag --list "company-*"` |
-| 2 | **New API Upstream Version** | `v1.0.0-rc.49` | `git tag --list "v1.0.0-rc.*" \| sort -V \| tail -1` |
-| 3 | **New API Commit SHA** | `48a6c87f9e7757fdc58e5be9bcb4f8281ad0dfd0` | `git rev-list -n 1 v1.0.0-rc.49` |
-| 4 | **Company Patch Version** | `P-001`（共 1 处：主题色） | 见 `company/patches/PATCHES.md` |
-| 5 | **Portal Version** | 与公司版同号 `v0.1.0` | 前后端同一仓库同一提交，见下表提交号 |
-| 6 | **Database Migration Version** | 无独立版本号（官方用 GORM AutoMigrate 自动建表，当前 38 张表） | `docker exec postgres psql -U root -d new-api -c "SELECT count(*) FROM pg_tables WHERE schemaname='public';"` |
-| 7 | **Docker Image Tag** | `company-newapi:0.3.0`（2026-11-10 15:40 已按 `docker-compose.company.yml` 重建 `:3000` 并核对镜像、版本串与前端主色） | `docker inspect new-api --format '{{.Config.Image}}'` |
+| 1 | **Company Edition Version** | `v0.2.0` | `git tag --list "company-*"` |
+| 2 | **New API Upstream Version** | `v1.0.0-rc.51` | `git tag --list "v1.0.0-rc.*" \| sort -V \| tail -1` |
+| 3 | **New API Commit SHA** | `c9c6da2786b6a0912215127e78e28fbc6650c85f` | `git rev-list -n 1 v1.0.0-rc.51` |
+| 4 | **Company Patch Version** | `P-002`（共 2 处：P-001 主题色、P-002 会话去重） | 见 `company/patches/PATCHES.md` |
+| 5 | **Portal Version** | 与公司版同号 `v0.2.0`（company-portal 提交 `f121a35`） | 前端仓库独立版本管理 |
+| 6 | **Database Migration Version** | 无独立版本号（GORM AutoMigrate 自动建表，**升级前后均为 38 张表**） | `docker exec postgres psql -U root -d new-api -c "SELECT count(*) FROM pg_tables WHERE schemaname='public';"` |
+| 7 | **Docker Image Tag** | `company-newapi:0.4.0` | `docker inspect new-api --format '{{.Config.Image}}'` |
 
 补充信息（不属于 7 项，但排障要用）：
 
 | 项目 | 值 |
 | --- | --- |
-| 代码提交（Git SHA） | 见 `git log -1 --format=%H` |
+| 代码提交（Git SHA） | `git log -1 --format=%H`（合并提交见升级报告） |
 | 数据库类型与版本 | PostgreSQL 15 |
 | 缓存 | Redis latest |
-| 后端二进制版本串 | `v0.1.0-company`（`GET /api/status` 的 `version` 字段可查） |
+| 后端二进制版本串 | `v0.2.0-company`（`GET /api/status` 的 `version` 字段实测可查） |
+| 升级前数据库备份 | `backups/new-api-before-rc51-20261116-0901.sql`（0.2 MB，升级前导出） |
 
 ---
 
@@ -37,7 +38,7 @@
 
 所以无法用「迁移版本 42」这样的编号还原。替代做法：
 
-- 记**表数量**（当前 38 张，2026-11-10 实测），升级后对比数量与结构变化
+- 记**表数量**（rc.49 与 rc.51 均为 38 张，2026-11-16 实测），升级后对比数量与结构变化
 - 正式升级前**完整备份数据库**（见 `UPGRADE.md` 第五节）
 - 需要精确还原时，用备份文件恢复，而不是靠迁移号回退
 
@@ -47,9 +48,11 @@
 
 | 公司版本 | 官方版本 | 官方 SHA | 补丁 | 镜像标签 | 记录日期 |
 | --- | --- | --- | --- | --- | --- |
+| v0.2.0 | v1.0.0-rc.51 | `c9c6da2` | P-001、P-002 | `company-newapi:0.4.0` | 2026-11-16 |
 | v0.1.0 | v1.0.0-rc.49 | `48a6c87` | P-001 | `company-newapi:0.3.0` | 2026-11-09 |
 
 > 新增版本时在表格追加一行，同时更新上面的「当前版本」区块。
+> 镜像编号与公司版本号不同步（v0.1.0 对应镜像 0.3.0）属历史遗留，从 v0.2.0 起按 `镜像 = 4.x`、`公司版本 = 0.2.x` 各自递增，以本表为准。
 
 ---
 
